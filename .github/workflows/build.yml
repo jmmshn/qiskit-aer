@@ -26,6 +26,17 @@ jobs:
         with:
           vs-version: '[17.0,18.0)'
         if: runner.os == 'Windows'
+      - name: Remove Windows SDK and other large tools
+        run: |
+          Remove-Item -Recurse -Force "C:\\Android" -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force "C:\\hostedtoolcache\\windows\\Java*" -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force "C:\\Program Files\\dotnet" -ErrorAction SilentlyContinue
+          # Remove unused Python versions (keep only what you need)
+          Get-ChildItem "C:\\hostedtoolcache\\windows\\Python" | Where-Object {$_.Name -notlike "3.9*"} | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force "$env:TEMP\\*" -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force "C:\\Windows\\Temp\\*" -ErrorAction SilentlyContinue
+        shell: pwsh
+        if: runner.os == 'Windows'
       - name: Install deps
         run: python -m pip install -U cibuildwheel==2.22.0
       - name: Build Wheels
